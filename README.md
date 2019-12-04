@@ -1,4 +1,4 @@
-# otterson tic tac toe demo
+# tic tac toe demo
 
 This was a programming test that I was given as part of a job interview.
 
