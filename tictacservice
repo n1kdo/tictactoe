@@ -9,10 +9,8 @@ Strategy lifted from http://en.wikipedia.org/wiki/Tic-tac-toe
 
 import cgi
 import cgitb
-import random
 
 cgitb.enable()
-random.seed()
 
 # noinspection SpellCheckingInspection,SpellCheckingInspection
 '''
@@ -120,12 +118,17 @@ def find_forcing_moves(board, player, opponents_forking_moves, opponents_favorab
             if square not in opponents_favorable_moves:
                 best_moves.append(square)
 
-    return best_moves
+    sorted_best_moves = []
+    for square in preferred_moves:
+        if square in best_moves:
+            sorted_best_moves.append(square)
+
+    return sorted_best_moves
 
 
 def find_favorable_moves(board, player, opponent):
     favorable_moves = []
-    for square in range(0, 9):
+    for square in preferred_moves:
         if board[square] == player:
             for winner in winners:
                 if square in winner:
@@ -184,7 +187,7 @@ def try_to_win(board, player, opponent):
     :return: the number of the square the computer wants to play
     """
     empty = []
-    for i in range(0, 9):
+    for i in preferred_moves:
         if board[i] == 0:
             empty.append(i)
 
@@ -220,10 +223,10 @@ def try_to_win(board, player, opponent):
     forcing_moves = find_forcing_moves(board, player, forking_moves, opponents_favorable_moves)
 
     if len(forcing_moves) > 0:
-        return forcing_moves[random.randrange(len(forcing_moves))]
+        return forcing_moves[0]
 
     if len(forking_moves) > 0:
-        return forking_moves[random.randrange(len(forking_moves))]
+        return forking_moves[0]
 
     for test_move in preferred_moves:
         if board[test_move] == 0:
@@ -234,17 +237,17 @@ def try_to_win(board, player, opponent):
 
 form = cgi.FieldStorage()
 
-print 'Content-type:text/json\r\n'
+print('Content-type:text/json\r\n')
 computerString = form.getvalue(computerKey, '')
 boardString = form.getvalue(boardKey, '')
 
 if computerString == "" or boardString == "":
-    print '{"error": "missing data"}'
+    print('{"error": "missing data"}')
 else:
     s = form[boardKey].value
     computerPlayer = int(computerString)
     if len(boardString) != 9:
-        print '{"error": "invalid board data"}'
+        print('{"error": "invalid board data"}')
     else:
         playBoard = []
         for c in boardString:
@@ -258,7 +261,7 @@ else:
         won = is_game_won(playBoard)
 
         if won != 0:
-            print '{"winner":%d, "board":"%s"}' % (won, boardString)
+            print('{"winner":%d, "board":"%s"}' % (won, boardString))
         else:
             move = try_to_win(playBoard, computerPlayer, humanPlayer)
             if move > -1:
@@ -268,6 +271,6 @@ else:
                 boardString += '%d' % spot
             won = is_game_won(playBoard)
             if won != 0:
-                print '{"move":%d, "player":%d, "winner":%d, "board":"%s"}' % (move, computerPlayer, won, boardString)
+                print('{"move":%d, "player":%d, "winner":%d, "board":"%s"}' % (move, computerPlayer, won, boardString))
             else:
-                print '{"move":%d, "player":%d, "board":"%s"}' % (move, computerPlayer, boardString)
+                print('{"move":%d, "player":%d, "board":"%s"}' % (move, computerPlayer, boardString))
